@@ -1,0 +1,50 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ControlMove : MonoBehaviour
+{
+    private float lookSpeed = 3f; // побаловался с приватами
+    private PlayerMotor motor;    //
+    private float MinY = -89f;    //
+    private float MaxY = 89f;     //
+    private float xRot;           //
+
+    public Rigidbody MyBody;  // Ссылка на свой Rigidboody
+    public float speed; // Скорость игрока
+   
+
+   
+    void Start()
+    {
+        motor = GetComponent<PlayerMotor>(); // обращаемся к компонентам скрипта PlayerMotor  и назначем ссыль мотор
+    }
+
+    
+    void Update()
+    {
+        //Считывание ввода с клавиатуры
+        float xMov = Input.GetAxisRaw("Horizontal");
+        float zMov = Input.GetAxisRaw("Vertical");
+
+        Vector3 movHor = transform.right * xMov;//шагаем лево право
+        Vector3 movVer = transform.forward * zMov;//вперед назад
+        Vector3 velocity = (movHor + movVer).normalized * speed; // диагональ
+
+        //верчение камеры вокруг оси у(горизонтально), работает отлично.
+        motor.Move(velocity);
+        float yRot = Input.GetAxisRaw("Mouse X");
+        Vector3 rotation = new Vector3(0f, yRot, 0f) * lookSpeed;
+        motor.Rotate(rotation);
+
+        /* вращение вокруг х, без ограничения(вертикально)
+        теперь я почти понимаю каково колобку
+         float xRot = Input.GetAxisRaw("Mouse Y");
+        Vector3 camRotation = new Vector3(xRot, 0f, 0f) * lookSpeed;
+         motor.RotateCam(camRotation);
+         вращение вокруг х с ограничениями. работает отлично */
+        xRot += Input.GetAxis("Mouse Y") * lookSpeed;
+        xRot = Mathf.Clamp(xRot, MinY, MaxY);
+        motor.cam.transform.localEulerAngles = new Vector3(-xRot, 0, 0);
+    }
+}
